@@ -17,15 +17,11 @@ import java.util.*;
 
 public class ProjectDomino {
         
-    /**
-     * Pide el numero de jugadores y sus nombres; los crea y les da fichas aleatorias
-     * @param m El monton de fichas
-     * @return Lista de jugadores con las fichas
-     */
+
     public static List<Jugador> preguntarJugadores(Monton m){
         Scanner scan = new Scanner(System.in);
         Jugador j;
-        List<Jugador> toret = new LinkedList<Jugador>();
+        List<Jugador> listaJugadores = new LinkedList<Jugador>();
         int numJug=0;
         do{
             try{
@@ -44,51 +40,39 @@ public class ProjectDomino {
             nombre=scan.nextLine();
             j= new Jugador(nombre);
             for(int y=0;y<7;y++){
-                j.añadirFicha(m.extraerRandom());
+                j.anadirFicha(m.extraerRandom());
             }
-            toret.add(j);
+            listaJugadores.add(j);
             i++;
         }
-        return toret;
+        return listaJugadores;
     }
     
-    /**
-     * Una condicion del final de la partida
-     * @param l Lista de jugadores
-     * @return True si algun jugador se quedo sin fichas, false si no
-     */
+
     public static boolean domino(List<Jugador> l){
-        boolean toret=false;
+        boolean finJuego=false;
         Jugador j;
         Iterator<Jugador> itr = l.iterator();
-        while(!toret && itr.hasNext()){
+        while(!finJuego && itr.hasNext()){
             j=itr.next();
             if(!j.tieneFichas()){
-                toret=true;
+                finJuego=true;
                 System.out.println("Enhorabuena "+j.getNombre()+", eres el ganador!");
             }
         }
-        return toret;
+        return finJuego;
     }
     
-    /**
-     * Condicion de final de partida
-     * @param mesa La mesa
-     * @return True si se acaba la partida, false si no
-     */
+
     public static boolean cierre(Mesa mesa){
-        boolean toret=false;
+        boolean cierre=false;
         if(!mesa.mesaVacia()){
-            toret=(mesa.getContador()[mesa.getPrimero().getNum1()]==8 && mesa.getContador()[mesa.getUltimo().getNum2()]==8);
+            cierre=(mesa.getContador()[mesa.getPrimero().getNum1()]==8 && mesa.getContador()[mesa.getUltimo().getNum2()]==8);
         }
-        return toret;
+        return cierre;
         }
-    
-    /**
-     * La parte interactiva del turno
-     * @param j El jugador que juega
-     * @param mesa La mesa
-     */
+
+
     public static void juego(Jugador j, Mesa mesa){
         Scanner scan = new Scanner(System.in);
         List<Ficha> jugables = j.fichasJugables(mesa);
@@ -110,15 +94,37 @@ public class ProjectDomino {
         opcion--;
         aux=jugables.get(opcion);
         System.out.println("La ficha escogida es: "+aux.toString());
-        mesa.colocarFicha(j,aux);
+
+        colocarFicha(j,aux,mesa);
     }
-    
-    /**
-     * Desarrollo del turno
-     * @param j El jugador al que le toca
-     * @param m El monton de fichas
-     * @param mesa La mesa
-     */    
+
+    private static void colocarFicha(Jugador j, Ficha aux, Mesa mesa) {
+        System.out.print("La ficha se puede colocar ");
+        if(mesa.isPosibleAlPrincipio(aux)){
+            System.out.print("al principio");
+        }
+        if(mesa.isPosibleAlFinal(aux)){
+            System.out.print("al final.");
+        }
+
+        boolean colocada=false;
+        Scanner scan = new Scanner(System.in);
+        char opcionColoc;
+        do{
+            do{
+                System.out.println("\nDonde la quieres colocar?(p/f)");
+                opcionColoc=scan.nextLine().charAt(0);
+            }while(opcionColoc!='p' && opcionColoc!='f');
+            if(opcionColoc=='p'){
+                colocada=mesa.insertarPrincipio(j,aux);
+            } else if(opcionColoc=='f'){
+                colocada=mesa.insertarFinal(j,aux);
+            }
+            if (!colocada) System.out.println("No se puede colocar en esa posición");
+        }while(!colocada);
+    }
+
+
     public static void turno(Jugador j, Monton m, Mesa mesa){
         Scanner scan = new Scanner(System.in);
         Ficha aux;
@@ -129,6 +135,7 @@ public class ProjectDomino {
         j.mostrarFichas();
         System.out.print("\n");
         if(j.puedeJugar(mesa)){
+            System.out.println(j.getNombre()+", puedes jugar.");
             juego(j, mesa);
         }
         else{
@@ -136,7 +143,7 @@ public class ProjectDomino {
             if(!m.esVacio()){
                 aux=m.extraerRandom();
                 System.out.println("Coges la ficha "+aux.toString());
-                j.añadirFicha(aux);
+                j.anadirFicha(aux);
                 if(aux.esColocable(mesa)){
                     juego(j,mesa);
                 }
@@ -149,10 +156,7 @@ public class ProjectDomino {
     
     
     
-    /**
-     * En caso de cierre, calcula quien ha ganado
-     * @param jugadores Todos los jugadores de la partida
-     */
+
     public static void calcularGanadorCierre(List<Jugador> jugadores){
         int ganador=0;
         boolean empate=false;

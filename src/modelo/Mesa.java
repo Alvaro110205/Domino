@@ -2,7 +2,6 @@ package modelo;
 
 import java.util.LinkedList;
 import java.util.Deque;
-import java.util.Scanner;
 
 public class Mesa {
     private Deque<Ficha> m;
@@ -21,92 +20,56 @@ public class Mesa {
         return m.getLast();
     }
     
-    public void insertarPrincipio(Ficha f){
-        m.addFirst(f);
+    public boolean insertarPrincipio(Jugador j, Ficha f){
+        boolean colocada=false;
+        if(isPosibleAlPrincipio(f)){
+            if(mesaVacia() || f.getNum2()==getPrimero().getNum1()){
+                m.addFirst(f);
+            }
+            else{
+                m.addFirst(f.inversa());
+            }
+            j.eliminaFicha(f);
+            getContador()[f.getNum1()]++;
+            getContador()[f.getNum2()]++;
+            colocada=true;
+        }
+        return colocada;
     }
     
-    public void insertarFinal(Ficha f){
-        m.addLast(f);
+    public boolean insertarFinal(Jugador j, Ficha f) {
+        boolean colocada=false;
+        if(isPosibleAlFinal(f)){
+            if(mesaVacia() || f.getNum2()==getUltimo().getNum1()){
+                m.addLast(f);
+            }
+            else{
+                m.addLast(f.inversa());
+            }
+            j.eliminaFicha(f);
+            getContador()[f.getNum1()]++;
+            getContador()[f.getNum2()]++;
+            colocada=true;
+        }
+        return colocada;
     }
 
     public int[] getContador() {
         return contador;
     }
-    
-    /**
-     * Coloca la ficha seleccionada en un extremo de la mesa a elegir por el jugador
-     * @param j El jugador que coloca la ficha
-     * @param aux La ficha a colocar
-     */
-    public void colocarFicha(Jugador j,Ficha aux){
-        Scanner scan = new Scanner(System.in);
-        char opcionColoc;
-        boolean principio=false;
-        boolean ultimo=false;
-        boolean colocada=false;
-        if(mesaVacia()){
-                principio=true;
-                ultimo=true;
-            }
-            else{
-                if(aux.getNum1()==getPrimero().getNum1() || aux.getNum2()==getPrimero().getNum1()){
-                    principio=true;
-                }
-                if(aux.getNum1()==getUltimo().getNum2() || aux.getNum2()==getUltimo().getNum2()){
-                    ultimo=true;
-                }
-            }
-        System.out.print("La ficha se puede colocar ");
-        if(principio){
-            System.out.print("al principio");
-        }
-        if(ultimo){
-            System.out.print("al final.");
-        }
-        do{    
-            do{
-                System.out.println("\nDonde la quieres colocar?(p/f)");
-                opcionColoc=scan.nextLine().charAt(0);
-            }while(opcionColoc!='p' && opcionColoc!='f');
-            if(opcionColoc=='p'){
-                if(principio){
-                     if(mesaVacia() || aux.getNum2()==getPrimero().getNum1()){
-                        insertarPrincipio(aux);
-                    }
-                    else{
-                        insertarPrincipio(aux.inversa());
-                    }
-                    j.eliminaFicha(aux);
-                    getContador()[aux.getNum1()]++;
-                    getContador()[aux.getNum2()]++;
-                    colocada=true;
-                }
-                else{
-                    System.out.println("No puedes colocar esa ficha al principio");
-                    colocada=false;
-                }
-            }
-            else if(opcionColoc=='f'){
-                if(ultimo){
-                    if(mesaVacia() || aux.getNum1()==getUltimo().getNum2()){
-                        insertarFinal(aux);
-                    }
-                    else{
-                        insertarFinal(aux.inversa());
-                    }
-                    j.eliminaFicha(aux);
-                    getContador()[aux.getNum1()]++;
-                    getContador()[aux.getNum2()]++;
-                    colocada=true;
-                }
-                else{
-                    System.out.println("No puedes colocar esa ficha al final");
-                    colocada=false;
-                }
-            }
-        }while(!colocada);
+
+    public boolean isPosibleAlPrincipio(Ficha aux) {
+        return this.mesaVacia()
+                || aux.getNum1() == getPrimero().getNum1()
+                || aux.getNum2() == getPrimero().getNum1();
     }
-    
+
+    public boolean isPosibleAlFinal(Ficha aux) {
+        return this.mesaVacia()
+                || aux.getNum1()==getUltimo().getNum2()
+                || aux.getNum2()==getUltimo().getNum2();
+    }
+
     public boolean mesaVacia(){
         return m.isEmpty();
     }

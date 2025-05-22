@@ -27,11 +27,11 @@ public class Monton {
     }
     
     public String toString(){
-        StringBuilder toret = new StringBuilder("El monton tiene: ");
+        StringBuilder texto = new StringBuilder("El monton tiene: ");
         for(Ficha i : m){
-            toret.append(i.toString()).append(" ");
+            texto.append(i.toString()).append(" ");
         }
-        return toret.toString();
+        return texto.toString();
     }
     
 }
